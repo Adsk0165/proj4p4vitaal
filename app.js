@@ -17,16 +17,16 @@ function initMap(userLocation) {
   });
 
   flowerLocations.forEach(location => {
-    marker = new google.maps.Marker({  // Verwijder 'const' hier
-        position: location,
-        map: map,
-        icon: {
-            url: 'assets/flower-icon.png',
-            scaledSize: new google.maps.Size(30, 30),
-        },
+    const marker = new google.maps.Marker({
+      position: location,
+      map: map,
+      icon: {
+        url: 'assets/flower-icon.png',
+        scaledSize: new google.maps.Size(30, 30),
+      },
     });
     flowerMarkers.push(marker);
-});
+  });
 
   userMarker = new google.maps.Marker({
     position: userLocation,
@@ -46,8 +46,9 @@ function watchUserLocation() {
       position => {
         const { latitude, longitude } = position.coords;
         const userLocation = { lat: latitude, lng: longitude };
-
-        userMarker.setPosition(userLocation);
+        
+        // Gebruik een animatie voor de update van de marker positie
+        animateMarker(userMarker, userMarker.getPosition(), userLocation);
         checkProximityToFlowers(userLocation);
       },
       error => {
@@ -62,6 +63,27 @@ function watchUserLocation() {
   } else {
     alert("Geolocation is not supported by this browser.");
   }
+}
+
+function animateMarker(marker, startPos, endPos) {
+  const deltaLat = endPos.lat - startPos.lat();
+  const deltaLng = endPos.lng - startPos.lng();
+  const frames = 60; // Aantal frames voor de animatie
+  let currentFrame = 0;
+
+  function moveMarker() {
+    currentFrame++;
+    const lat = startPos.lat() + (deltaLat * (currentFrame / frames));
+    const lng = startPos.lng() + (deltaLng * (currentFrame / frames));
+    const newPosition = new google.maps.LatLng(lat, lng);
+    marker.setPosition(newPosition);
+
+    if (currentFrame < frames) {
+      requestAnimationFrame(moveMarker);
+    }
+  }
+
+  requestAnimationFrame(moveMarker);
 }
 
 function checkProximityToFlowers(userLocation) {
@@ -104,24 +126,21 @@ window.onload = function() {
 
 function updatePosition() {
   $.ajax({
-      url: 'get_position.php',
-      dataType: 'json',
-      success: function(data) {
-          // Update de positie van de marker
-          var newPosition = new google.maps.LatLng(data.lat, data.lng);
-          marker.setPosition(newPosition);
-      },
-      complete: function() {
-          // Roep de functie opnieuw aan na een vertraging
-          setTimeout(updatePosition, 10000); // 10 seconden vertraging
-      }
+    url: 'get_position.php',
+    dataType: 'json',
+    success: function(data) {
+      // Update de positie van de marker
+      var newPosition = new google.maps.LatLng(data.lat, data.lng);
+      animateMarker(marker, marker.getPosition(), newPosition);
+    },
+    complete: function() {
+      // Roep de functie opnieuw aan na een vertraging
+      setTimeout(updatePosition, 10000); // 10 seconden vertraging
+    }
   });
 }
 
 // Roep de functie initieel aan
 $(document).ready(function() {
-  // Initialiseer de marker hier (moet eerder worden gedaan)
-  // bijvoorbeeld: marker = new google.maps.Marker({ ... });
-  // Daarna kunnen we de updatePosition functie aanroepen
   updatePosition();
 });
