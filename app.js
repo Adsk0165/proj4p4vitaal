@@ -10,6 +10,7 @@ const endLocation = { lat: 51.557, lng: 4.569 };
 const flowerLocations = [
   { lat: 51.54827117919922, lng: 4.5983967781066895 },
   { lat: 51.5569, lng: 4.5983967781066895 },
+  { lat: 51.585935913488875, lng: 4.79281179602562 },
 ];
 
 function initMap() {
@@ -36,35 +37,37 @@ function initMap() {
   });
 
   if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(
-      position => {
-        const { latitude, longitude } = position.coords;
-        const userLocation = { lat: latitude, lng: longitude };
+    setInterval(() => {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
+          const userLocation = { lat: latitude, lng: longitude };
 
-        if (userMarker) {
-          userMarker.setPosition(userLocation);
-        } else {
-          userMarker = new google.maps.Marker({
-            position: userLocation,
-            map: map,
-            icon: {
-              url: 'assets/current-location-icon.png',
-              scaledSize: new google.maps.Size(30, 30),
-            },
-          });
+          if (userMarker) {
+            userMarker.setPosition(userLocation);
+          } else {
+            userMarker = new google.maps.Marker({
+              position: userLocation,
+              map: map,
+              icon: {
+                url: 'assets/current-location-icon.png',
+                scaledSize: new google.maps.Size(30, 30),
+              },
+            });
+          }
+
+          checkProximityToFlowers(userLocation);
+        },
+        error => {
+          console.error("Error getting position: ", error);
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 5000,
         }
-
-        checkProximityToFlowers(userLocation);
-      },
-      error => {
-        console.error("Error watching position: ", error);
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 5000,
-      }
-    );
+      );
+    }, 1000); // Update location every second
   } else {
     alert("Geolocation is not supported by this browser.");
   }
