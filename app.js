@@ -5,8 +5,8 @@ let directionsRenderer;
 const flowerMarkers = [];
 const flowersCollected = new Set();
 
-const startLocation = { lat: 51.557, lng: 4.569 }; // Korona 5, Sint Willebrord
-const endLocation = { lat: 51.557, lng: 4.569 }; // Voor een eenvoudige route, gebruiken we dezelfde locatie
+const startLocation = { lat: 51.557, lng: 4.569 };
+const endLocation = { lat: 51.557, lng: 4.569 };
 const flowerLocations = [
   { lat: 51.54827117919922, lng: 4.5983967781066895 },
   { lat: 51.5569, lng: 4.5983967781066895 },
