@@ -1,93 +1,67 @@
 let map;
 let userMarker;
-let directionsService;
-let directionsRenderer;
 const flowerMarkers = [];
 const flowersCollected = new Set();
+var marker;
 
-const startLocation = { lat: 51.557, lng: 4.569 };
-const endLocation = { lat: 51.557, lng: 4.569 };
 const flowerLocations = [
   { lat: 51.54827117919922, lng: 4.5983967781066895 },
   { lat: 51.5569, lng: 4.5983967781066895 },
   { lat: 51.585935913488875, lng: 4.79281179602562 },
 ];
 
-function initMap() {
+function initMap(userLocation) {
   map = new google.maps.Map(document.getElementById("map"), {
-    center: startLocation,
+    center: userLocation,
     zoom: 16,
   });
 
-  directionsService = new google.maps.DirectionsService();
-  directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
-
-  calculateAndDisplayRoute();
-
   flowerLocations.forEach(location => {
-    const marker = new google.maps.Marker({
-      position: location,
-      map: map,
-      icon: {
-        url: 'assets/flower-icon.png',
-        scaledSize: new google.maps.Size(30, 30),
-      },
+    marker = new google.maps.Marker({  // Verwijder 'const' hier
+        position: location,
+        map: map,
+        icon: {
+            url: 'assets/flower-icon.png',
+            scaledSize: new google.maps.Size(30, 30),
+        },
     });
     flowerMarkers.push(marker);
+});
+
+  userMarker = new google.maps.Marker({
+    position: userLocation,
+    map: map,
+    icon: {
+      url: 'assets/current-location-icon.png',
+      scaledSize: new google.maps.Size(30, 30),
+    },
   });
 
+  watchUserLocation();
+}
+
+function watchUserLocation() {
   if (navigator.geolocation) {
-    setInterval(() => {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          const { latitude, longitude } = position.coords;
-          const userLocation = { lat: latitude, lng: longitude };
+    navigator.geolocation.watchPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+        const userLocation = { lat: latitude, lng: longitude };
 
-          if (userMarker) {
-            userMarker.setPosition(userLocation);
-          } else {
-            userMarker = new google.maps.Marker({
-              position: userLocation,
-              map: map,
-              icon: {
-                url: 'assets/current-location-icon.png',
-                scaledSize: new google.maps.Size(30, 30),
-              },
-            });
-          }
-
-          checkProximityToFlowers(userLocation);
-        },
-        error => {
-          console.error("Error getting position: ", error);
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 0,
-          timeout: 5000,
-        }
-      );
-    }, 1000); // Update location every second
+        userMarker.setPosition(userLocation);
+        checkProximityToFlowers(userLocation);
+      },
+      error => {
+        console.error("Error getting position: ", error);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 5000,
+      }
+    );
   } else {
     alert("Geolocation is not supported by this browser.");
   }
-}
-
-function calculateAndDisplayRoute() {
-  directionsService.route(
-    {
-      origin: startLocation,
-      destination: endLocation,
-      travelMode: google.maps.TravelMode.WALKING,
-    },
-    (response, status) => {
-      if (status === google.maps.DirectionsStatus.OK) {
-        directionsRenderer.setDirections(response);
-      } else {
-        console.error("Directions request failed due to " + status);
-      }
-    }
-  );
 }
 
 function checkProximityToFlowers(userLocation) {
@@ -105,4 +79,49 @@ function checkProximityToFlowers(userLocation) {
   });
 }
 
-window.onload = initMap;
+window.onload = function() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+        const userLocation = { lat: latitude, lng: longitude };
+        initMap(userLocation);
+      },
+      error => {
+        console.error("Error getting position: ", error);
+        alert("Geolocation is not supported by this browser.");
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 5000,
+      }
+    );
+  } else {
+    alert("Geolocation is not supported by this browser.");
+  }
+};
+
+function updatePosition() {
+  $.ajax({
+      url: 'get_position.php',
+      dataType: 'json',
+      success: function(data) {
+          // Update de positie van de marker
+          var newPosition = new google.maps.LatLng(data.lat, data.lng);
+          marker.setPosition(newPosition);
+      },
+      complete: function() {
+          // Roep de functie opnieuw aan na een vertraging
+          setTimeout(updatePosition, 10000); // 10 seconden vertraging
+      }
+  });
+}
+
+// Roep de functie initieel aan
+$(document).ready(function() {
+  // Initialiseer de marker hier (moet eerder worden gedaan)
+  // bijvoorbeeld: marker = new google.maps.Marker({ ... });
+  // Daarna kunnen we de updatePosition functie aanroepen
+  updatePosition();
+});
