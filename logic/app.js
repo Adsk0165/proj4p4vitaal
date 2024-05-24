@@ -21,7 +21,7 @@ function initMap(userLocation) {
       position: location,
       map: map,
       icon: {
-        url: 'assets/flower-icon.png',
+        url: '../assets/flower-icon.png',
         scaledSize: new google.maps.Size(30, 30),
       },
     });
@@ -32,7 +32,7 @@ function initMap(userLocation) {
     position: userLocation,
     map: map,
     icon: {
-      url: 'assets/current-location-icon.png',
+      url: '../assets/current-location-icon.png',
       scaledSize: new google.maps.Size(30, 30),
     },
   });
@@ -126,7 +126,7 @@ window.onload = function() {
 
 function updatePosition() {
   $.ajax({
-    url: 'get_position.php',
+    url: '../logic/get_position.php',
     dataType: 'json',
     success: function(data) {
       // Update de positie van de marker
