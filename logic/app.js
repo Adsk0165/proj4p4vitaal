@@ -1,9 +1,9 @@
+mapboxgl.accessToken = 'pk.eyJ1Ijoidml0YWFsb3ZlcmFsMjAyNCIsImEiOiJjbHdseHNoYTEwajVzMmpueG15NjFiNzliIn0.i0vTHFJc8gnPInHozWhDuA';
+
 let map;
 let userMarker;
 const flowerMarkers = [];
 const flowersCollected = new Set();
-var marker;
-
 const flowerLocations = [
   { lat: 51.54827117919922, lng: 4.5983967781066895 },
   { lat: 51.5569, lng: 4.5983967781066895 },
@@ -11,31 +11,28 @@ const flowerLocations = [
 ];
 
 function initMap(userLocation) {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: userLocation,
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [userLocation.lng, userLocation.lat],
     zoom: 16,
   });
 
   flowerLocations.forEach(location => {
-    const marker = new google.maps.Marker({
-      position: location,
-      map: map,
-      icon: {
-        url: '../assets/flower-icon.png',
-        scaledSize: new google.maps.Size(30, 30),
-      },
-    });
+    const marker = new mapboxgl.Marker({
+      element: createMarkerElement('../assets/flower-icon.png', 30, 30)
+    })
+    .setLngLat([location.lng, location.lat])
+    .addTo(map);
+
     flowerMarkers.push(marker);
   });
 
-  userMarker = new google.maps.Marker({
-    position: userLocation,
-    map: map,
-    icon: {
-      url: '../assets/current-location-icon.png',
-      scaledSize: new google.maps.Size(30, 30),
-    },
-  });
+  userMarker = new mapboxgl.Marker({
+    element: createMarkerElement('../assets/current-location-icon.png', 30, 30)
+  })
+  .setLngLat([userLocation.lng, userLocation.lat])
+  .addTo(map);
 
   watchUserLocation();
 }
@@ -46,9 +43,8 @@ function watchUserLocation() {
       position => {
         const { latitude, longitude } = position.coords;
         const userLocation = { lat: latitude, lng: longitude };
-        
-        // Gebruik een animatie voor de update van de marker positie
-        animateMarker(userMarker, userMarker.getPosition(), userLocation);
+
+        animateMarker(userMarker, userMarker.getLngLat(), userLocation);
         checkProximityToFlowers(userLocation);
       },
       error => {
@@ -66,17 +62,16 @@ function watchUserLocation() {
 }
 
 function animateMarker(marker, startPos, endPos) {
-  const deltaLat = endPos.lat - startPos.lat();
-  const deltaLng = endPos.lng - startPos.lng();
-  const frames = 60; // Aantal frames voor de animatie
+  const deltaLat = endPos.lat - startPos.lat;
+  const deltaLng = endPos.lng - startPos.lng;
+  const frames = 60;
   let currentFrame = 0;
 
   function moveMarker() {
     currentFrame++;
-    const lat = startPos.lat() + (deltaLat * (currentFrame / frames));
-    const lng = startPos.lng() + (deltaLng * (currentFrame / frames));
-    const newPosition = new google.maps.LatLng(lat, lng);
-    marker.setPosition(newPosition);
+    const lat = startPos.lat + (deltaLat * (currentFrame / frames));
+    const lng = startPos.lng + (deltaLng * (currentFrame / frames));
+    marker.setLngLat([lng, lat]);
 
     if (currentFrame < frames) {
       requestAnimationFrame(moveMarker);
@@ -88,17 +83,24 @@ function animateMarker(marker, startPos, endPos) {
 
 function checkProximityToFlowers(userLocation) {
   flowerMarkers.forEach((marker, index) => {
-    const flowerLocation = marker.getPosition();
-    const distance = google.maps.geometry.spherical.computeDistanceBetween(
-      new google.maps.LatLng(userLocation),
-      flowerLocation
-    );
-    if (distance < 50 && !flowersCollected.has(index)) { // 50 meters radius
-      marker.setMap(null); // Remove marker from map
-      flowersCollected.add(index); // Mark flower as collected
+    const flowerLocation = marker.getLngLat();
+    const distance = turf.distance([userLocation.lng, userLocation.lat], [flowerLocation.lng, flowerLocation.lat], { units: 'meters' });
+    console.log(`Distance to flower ${index}: ${distance} meters`); // Debugging output
+    if (distance < 50 && !flowersCollected.has(index)) {
+      marker.remove();
+      flowersCollected.add(index);
       alert("Flower Collected!");
     }
   });
+}
+
+function createMarkerElement(url, width, height) {
+  const element = document.createElement('div');
+  element.style.backgroundImage = `url(${url})`;
+  element.style.backgroundSize = 'cover';
+  element.style.width = `${width}px`;
+  element.style.height = `${height}px`;
+  return element;
 }
 
 window.onload = function() {
@@ -129,18 +131,15 @@ function updatePosition() {
     url: '../logic/get_position.php',
     dataType: 'json',
     success: function(data) {
-      // Update de positie van de marker
-      var newPosition = new google.maps.LatLng(data.lat, data.lng);
-      animateMarker(marker, marker.getPosition(), newPosition);
+      const newPosition = { lat: data.lat, lng: data.lng };
+      animateMarker(userMarker, userMarker.getLngLat(), newPosition);
     },
     complete: function() {
-      // Roep de functie opnieuw aan na een vertraging
-      setTimeout(updatePosition, 10000); // 10 seconden vertraging
+      setTimeout(updatePosition, 10000);
     }
   });
 }
 
-// Roep de functie initieel aan
 $(document).ready(function() {
   updatePosition();
 });
