@@ -8,6 +8,7 @@ const flowerLocations = [
   { lat: 51.54827117919922, lng: 4.5983967781066895 },
   { lat: 51.5569, lng: 4.5983967781066895 },
   { lat: 51.585935913488875, lng: 4.79281179602562 },
+  { lat: 51.540415, lng: 4.607396}
 ];
 
 function initMap(userLocation) {
@@ -81,16 +82,34 @@ function animateMarker(marker, startPos, endPos) {
   requestAnimationFrame(moveMarker);
 }
 
+function celebrate() {
+  // Voeg confetti toe
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+  });
+
+  // Laat de pop-up zien
+  const popup = document.getElementById('popup');
+  popup.style.display = 'flex';
+
+  // Verberg de pop-up na enkele seconden
+  setTimeout(() => {
+      popup.style.display = 'none';
+  }, 5000); // Stel hier de gewenste tijd in voor het tonen van de pop-up
+}
+
 function checkProximityToFlowers(userLocation) {
   flowerMarkers.forEach((marker, index) => {
-    const flowerLocation = marker.getLngLat();
-    const distance = turf.distance([userLocation.lng, userLocation.lat], [flowerLocation.lng, flowerLocation.lat], { units: 'meters' });
-    console.log(`Distance to flower ${index}: ${distance} meters`); // Debugging output
-    if (distance < 50 && !flowersCollected.has(index)) {
-      marker.remove();
-      flowersCollected.add(index);
-      alert("Flower Collected!");
-    }
+      const flowerLocation = marker.getLngLat();
+      const distance = turf.distance([userLocation.lng, userLocation.lat], [flowerLocation.lng, flowerLocation.lat], { units: 'meters' });
+      console.log(`Distance to flower ${index}: ${distance} meters`); // Debugging output
+      if (distance < 50 && !flowersCollected.has(index)) {
+          marker.remove();
+          flowersCollected.add(index);
+          celebrate(); // Roep de functie aan om te vieren
+      }
   });
 }
 
