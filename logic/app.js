@@ -4,10 +4,10 @@ let map;
 let userMarker;
 const flowerMarkers = [];
 const flowerPaths = [];
-const amountOfFlowers = 1;
-const radiusInMeters = 200;
-const MINIMAL_FLOWER_DISTANCE_IN_METERS = 1;
-const initialFlowerPickupDistance = 200;
+const amountOfFlowers = 2;
+const radiusInMeters = 100;
+const MINIMAL_FLOWER_DISTANCE_IN_METERS = 10;
+const initialFlowerPickupDistance = 50;
 const flowersCollected = new Set();
 
 function initializeFlowerPaths(array, count) {
@@ -88,7 +88,7 @@ function animateMarker(marker, startPos, endPos) {
   requestAnimationFrame(moveMarker);
 }
 
-function celebrateSingleFlower(flowerImageUrl) {
+function celebrateSingleFlower(flowerPath) {
   confetti({
     particleCount: 100,
     spread: 70,
@@ -96,7 +96,7 @@ function celebrateSingleFlower(flowerImageUrl) {
   });
 
   const flowerImg = document.getElementById("collected-flower-img");
-  flowerImg.src = flowerImageUrl;
+  flowerImg.src = flowerPath;
 
   const popup = document.getElementById("popup-flower");
   popup.style.display = "flex";
@@ -156,17 +156,17 @@ function checkProximityToFlowers(userLocation) {
       marker.remove();
       flowersCollected.add(index);
 
-      const flowerImageUrl = flowerPaths[index];
-      console.log(flowerImageUrl);
-      console.log(flowerPaths);
+      // Accessing the flowerPath from the marker options
+      let flowerPath = marker.options.flowerPath;
       if (flowersCollected.size === amountOfFlowers) {
         showAllFlowersCollectedMessage();
       } else {
-        celebrateSingleFlower(flowerImageUrl);
+        celebrateSingleFlower(flowerPath);
       }
     }
   });
 }
+
 
 function createMarkerElement(url, width, height) {
   const element = document.createElement("div");
@@ -202,17 +202,30 @@ function generateFlowerLocations(center, count, radius) {
           });
         }
 
+        let flowerIndex = Math.floor(Math.random() * flowerPaths.length);
+
         const marker = new mapboxgl.Marker({
-          element: createMarkerElement(pickRandomFlower(flowerPaths), 30, 30),
+          element: createMarkerElement(flowerPaths[flowerIndex], 30, 30),
         })
           .setLngLat([location.lng, location.lat])
           .addTo(map);
 
+        if (!marker.options) {
+          marker.options = {}; // Ensure options object exists
+        }
+
+        marker.options.flowerPath = flowerPaths[flowerIndex];
         flowerMarkers.push(marker);
+
+        // Log the generated flower image paths
+        console.log(`Flower ${i + 1} path: ${flowerPaths[flowerIndex]}`);
       }
     })
     .catch((error) => console.error("Error fetching isochrone:", error));
 }
+
+
+
 
 function getRandomPointInPolygon(polygon) {
   const bbox = turf.bbox(turf.polygon([polygon]));
