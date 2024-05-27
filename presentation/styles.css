@@ -1,5 +1,18 @@
+/* Definieer kleurvariabelen */
+:root {
+  --primary-color-grijs: #343a40;
+  --primary-color-oranje: #fd7e14;
+  --primary-color-oranje-hover: #e06b10;
+  
+  --primary-text-color: #ffffff;
+  --card-bg-color: #ffffff;
+  --card-box-shadow: rgba(0, 0, 0, 0.1);
+  --body-bg-color: #f8f9fa;
+}
+
 body {
     font-family: Arial, sans-serif;
+    background-color: var(--body-bg-color);
   }
   
   h1 {
@@ -11,7 +24,34 @@ body {
     width: 100%;
   }
 
-  /* CSS voor de pop-up */
+  .navbar {
+    background-color: var(--primary-color-grijs);
+  }
+  
+  .navbar-brand, .nav-link {
+    color: var(--primary-text-color) !important;
+  }
+  
+  .container {
+    margin-top: 5rem;
+  }
+  .card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px var(--card-box-shadow);
+    background-color: var(--card-bg-color);
+  }
+  
+  .btn-primary {
+    background-color: var(--primary-color-oranje);
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--primary-color-oranje-hover);
+  }
+
+    /* CSS voor de pop-up */
 .popup {
   position: fixed;
   top: 0;
