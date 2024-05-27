@@ -1,14 +1,44 @@
-mapboxgl.accessToken = "pk.eyJ1Ijoidml0YWFsb3ZlcmFsMjAyNCIsImEiOiJjbHdseHNoYTEwajVzMmpueG15NjFiNzliIn0.i0vTHFJc8gnPInHozWhDuA";
+mapboxgl.accessToken =
+  "pk.eyJ1Ijoidml0YWFsb3ZlcmFsMjAyNCIsImEiOiJjbHdseHNoYTEwajVzMmpueG15NjFiNzliIn0.i0vTHFJc8gnPInHozWhDuA";
 
 let map;
 let userMarker;
 const flowerMarkers = [];
 const flowerPaths = [];
-const amountOfFlowers = 7;
-const radiusInMeters = 500;
-const MINIMAL_FLOWER_DISTANCE_IN_METERS = 100;
+const amountOfFlowers = 2;
+const radiusInMeters = 100;
+const MINIMAL_FLOWER_DISTANCE_IN_METERS = 10;
 const initialFlowerPickupDistance = 20;
 const flowersCollected = new Set();
+const flowers = [
+  { name: "flower_1", path: "assets/flower_1.png" },
+  { name: "flower_2", path: "assets/flower_2.png" },
+  { name: "flower_3", path: "assets/flower_3.png" },
+  { name: "flower_4", path: "assets/flower_4.png" },
+  { name: "flower_5", path: "assets/flower_5.png" },
+  { name: "flower_6", path: "assets/flower_6.png" },
+  { name: "flower_7", path: "assets/flower_7.png" },
+  { name: "flower_8", path: "assets/flower_8.png" },
+  { name: "flower_9", path: "assets/flower_9.png" },
+  { name: "flower_10", path: "assets/flower_10.png" },
+  { name: "flower_11", path: "assets/flower_11.png" },
+  { name: "flower_12", path: "assets/flower_12.png" },
+  { name: "flower_13", path: "assets/flower_13.png" },
+  { name: "flower_14", path: "assets/flower_14.png" },
+  { name: "flower_15", path: "assets/flower_15.png" },
+  { name: "flower_16", path: "assets/flower_16.png" },
+  { name: "flower_17", path: "assets/flower_17.png" },
+  { name: "flower_18", path: "assets/flower_18.png" },
+  { name: "flower_19", path: "assets/flower_19.png" },
+  { name: "flower_20", path: "assets/flower_20.png" },
+  { name: "flower_21", path: "assets/flower_21.png" },
+  { name: "flower_22", path: "assets/flower_22.png" },
+  { name: "flower_23", path: "assets/flower_23.png" },
+  { name: "flower_24", path: "assets/flower_24.png" },
+  { name: "flower_25", path: "assets/flower_25.png" },
+  { name: "flower_26", path: "assets/flower_26.png" },
+  { name: "flower_27", path: "assets/flower_27.png" },
+];
 
 function initializeFlowerPaths(array, count) {
   for (let i = 1; i <= count; i++) {
@@ -88,7 +118,7 @@ function animateMarker(marker, startPos, endPos) {
   requestAnimationFrame(moveMarker);
 }
 
-function celebrateSingleFlower(flowerPath) {
+function celebrateSingleFlower(flower) {
   confetti({
     particleCount: 100,
     spread: 70,
@@ -96,14 +126,20 @@ function celebrateSingleFlower(flowerPath) {
   });
 
   const flowerImg = document.getElementById("collected-flower-img");
-  flowerImg.src = flowerPath;
-
+  const flowerName = document.getElementById("collected-flower-name");
   const popup = document.getElementById("popup-flower");
-  popup.style.display = "flex";
 
-  setTimeout(() => {
-    popup.style.display = "none";
-  }, 3000);
+  if (flowerImg && flowerName && popup) {
+    flowerImg.src = flower.path;
+    flowerName.textContent = flower.name;
+    popup.style.display = "flex";
+
+    setTimeout(() => {
+      popup.style.display = "none";
+    }, 3000);
+  } else {
+    console.error("One or more required elements not found.");
+  }
 }
 
 function showAllFlowersCollectedMessage() {
@@ -152,26 +188,30 @@ function checkProximityToFlowers(userLocation) {
       { units: "meters" }
     );
 
-    if (distance < initialFlowerPickupDistance && !flowersCollected.has(index)) {
+    if (
+      distance < initialFlowerPickupDistance &&
+      !flowersCollected.has(index)
+    ) {
       marker.remove();
       flowersCollected.add(index);
 
       // Accessing the flowerPath from the marker options
-      let flowerPath = marker.options.flowerPath;
+      let flower = marker.options.flower;
       if (flowersCollected.size === amountOfFlowers) {
         showAllFlowersCollectedMessage();
       } else {
-        celebrateSingleFlower(flowerPath);
+        celebrateSingleFlower(flower);
       }
     }
   });
 }
 
-
 function createMarkerElement(url, width, height) {
   const element = document.createElement("div");
   element.style.backgroundImage = `url(${url})`;
-  element.style.backgroundSize = "cover";
+  element.style.backgroundSize = "contain";
+  element.style.backgroundRepeat = "no-repeat";
+  element.style.backgroundPosition = "center";
   element.style.width = `${width}px`;
   element.style.height = `${height}px`;
   return element;
@@ -202,10 +242,10 @@ function generateFlowerLocations(center, count, radius) {
           });
         }
 
-        let flowerIndex = Math.floor(Math.random() * flowerPaths.length);
+        const randomFlower = pickRandomFlower(flowers);
 
         const marker = new mapboxgl.Marker({
-          element: createMarkerElement(flowerPaths[flowerIndex], 30, 30),
+          element: createMarkerElement(randomFlower.path, 30, 30),
         })
           .setLngLat([location.lng, location.lat])
           .addTo(map);
@@ -214,18 +254,15 @@ function generateFlowerLocations(center, count, radius) {
           marker.options = {}; // Ensure options object exists
         }
 
-        marker.options.flowerPath = flowerPaths[flowerIndex];
+        marker.options.flower = randomFlower; // Set flower object instead of path
         flowerMarkers.push(marker);
 
         // Log the generated flower image paths
-        console.log(`Flower ${i + 1} path: ${flowerPaths[flowerIndex]}`);
+        console.log(`Flower ${i + 1} path: ${randomFlower.path}`);
       }
     })
     .catch((error) => console.error("Error fetching isochrone:", error));
 }
-
-
-
 
 function getRandomPointInPolygon(polygon) {
   const bbox = turf.bbox(turf.polygon([polygon]));
