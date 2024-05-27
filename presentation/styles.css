@@ -11,42 +11,63 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background-color: var(--body-bg-color);
+    font-family: Arial, sans-serif;
+    background-color: var(--body-bg-color);
+  }
+  
+  h1 {
+    text-align: center;
+  }
+  
+  #map {
+    height: 100vh;
+    width: 100%;
+  }
+
+  .navbar {
+    background-color: var(--primary-color-grijs);
+  }
+  
+  .navbar-brand, .nav-link {
+    color: var(--primary-text-color) !important;
+  }
+  
+  .container {
+    margin-top: 5rem;
+  }
+  .card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px var(--card-box-shadow);
+    background-color: var(--card-bg-color);
+  }
+  
+  .btn-primary {
+    background-color: var(--primary-color-oranje);
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--primary-color-oranje-hover);
+  }
+
+    /* CSS voor de pop-up */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
 }
 
-h1 {
+.popup-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
   text-align: center;
 }
-
-#map {
-  height: 100vh;
-  width: 100%;
-}
-
-.navbar {
-  background-color: var(--primary-color-grijs);
-}
-
-.navbar-brand, .nav-link {
-  color: var(--primary-text-color) !important;
-}
-
-.container {
-  margin-top: 5rem;
-}
-.card {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px var(--card-box-shadow);
-  background-color: var(--card-bg-color);
-}
-
-.btn-primary {
-  background-color: var(--primary-color-oranje);
-  border: none;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-color-oranje-hover);
-}
+  
