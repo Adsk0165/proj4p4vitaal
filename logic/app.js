@@ -89,7 +89,7 @@ function animateMarker(marker, startPos, endPos) {
   requestAnimationFrame(moveMarker);
 }
 
-function celebrate() {
+function collectFlower() {
   // Voeg confetti toe
   confetti({
     particleCount: 100,
@@ -97,14 +97,14 @@ function celebrate() {
     origin: { y: 0.6 },
   });
 
-  // Laat de pop-up zien
-  const popup = document.getElementById("popup");
-  popup.style.display = "flex";
+  // Toon de melding
+  const notification = document.getElementById("notification");
+  notification.style.display = "block";
 
-  // Verberg de pop-up na enkele seconden
+  // Verberg de melding na 10 seconden
   setTimeout(() => {
-    popup.style.display = "none";
-  }, 5000); // Stel hier de gewenste tijd in voor het tonen van de pop-up
+    notification.style.display = "none";
+  }, 10000);
 }
 
 function checkProximityToFlowers(userLocation) {
@@ -130,7 +130,7 @@ function checkProximityToFlowers(userLocation) {
     ) {
       marker.remove();
       flowersCollected.add(index);
-      celebrate(); // Roep de functie aan om te vieren
+      collectFlower(); // Roep de functie aan om te vieren
     }
   });
 }
