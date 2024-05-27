@@ -4,10 +4,10 @@ let map;
 let userMarker;
 const flowerMarkers = [];
 const flowerPaths = [];
-const amountOfFlowers = 3;
+const amountOfFlowers = 1;
 const radiusInMeters = 200;
 const MINIMAL_FLOWER_DISTANCE_IN_METERS = 1;
-const initialFlowerPickupDistance = 50;
+const initialFlowerPickupDistance = 200;
 const flowersCollected = new Set();
 
 function initializeFlowerPaths(array, count) {
