@@ -1,14 +1,13 @@
-mapboxgl.accessToken =
-  "pk.eyJ1Ijoidml0YWFsb3ZlcmFsMjAyNCIsImEiOiJjbHdseHNoYTEwajVzMmpueG15NjFiNzliIn0.i0vTHFJc8gnPInHozWhDuA";
+mapboxgl.accessToken = "pk.eyJ1Ijoidml0YWFsb3ZlcmFsMjAyNCIsImEiOiJjbHdseHNoYTEwajVzMmpueG15NjFiNzliIn0.i0vTHFJc8gnPInHozWhDuA";
 
 let map;
 let userMarker;
 const flowerMarkers = [];
 const flowerPaths = [];
-const amountOfFlowers = 10;
-const radiusInMeters = 500;
-const MINIMAL_FLOWER_DISTANCE_IN_METERS = 20;
-const initialFlowerPickupDistance = 10;
+const amountOfFlowers = 3;
+const radiusInMeters = 200;
+const MINIMAL_FLOWER_DISTANCE_IN_METERS = 1;
+const initialFlowerPickupDistance = 50;
 const flowersCollected = new Set();
 
 function initializeFlowerPaths(array, count) {
@@ -34,7 +33,7 @@ function initMap(userLocation) {
     zoom: 16,
   });
 
-  generateFlowerLocations(userLocation, amountOfFlowers, radiusInMeters); // 10 flowers within 1 km radius
+  generateFlowerLocations(userLocation, amountOfFlowers, radiusInMeters);
 
   userMarker = new mapboxgl.Marker({
     element: createMarkerElement("../assets/current_location_icon.png", 30, 30),
@@ -89,22 +88,59 @@ function animateMarker(marker, startPos, endPos) {
   requestAnimationFrame(moveMarker);
 }
 
-function celebrate() {
-  // Voeg confetti toe
+function celebrateSingleFlower(flowerImageUrl) {
   confetti({
     particleCount: 100,
     spread: 70,
     origin: { y: 0.6 },
   });
 
-  // Laat de pop-up zien
-  const popup = document.getElementById("popup");
+  const flowerImg = document.getElementById("collected-flower-img");
+  flowerImg.src = flowerImageUrl;
+
+  const popup = document.getElementById("popup-flower");
   popup.style.display = "flex";
 
-  // Verberg de pop-up na enkele seconden
   setTimeout(() => {
     popup.style.display = "none";
-  }, 5000); // Stel hier de gewenste tijd in voor het tonen van de pop-up
+  }, 3000);
+}
+
+function showAllFlowersCollectedMessage() {
+  const duration = 10 * 1000,
+    animationEnd = Date.now() + duration,
+    defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+  function randomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  const interval = setInterval(function () {
+    const timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    const particleCount = 50 * (timeLeft / duration);
+
+    // since particles fall down, start a bit higher than random
+    confetti(
+      Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+      })
+    );
+    confetti(
+      Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+      })
+    );
+  }, 250);
+
+  const popup = document.getElementById("popup-bouquet");
+  popup.style.display = "flex";
 }
 
 function checkProximityToFlowers(userLocation) {
@@ -116,21 +152,18 @@ function checkProximityToFlowers(userLocation) {
       { units: "meters" }
     );
 
-    // Skip proximity check if user is within initialFlowerPickupDistance
-    if (distance < initialFlowerPickupDistance) {
-      console.log(
-        `Flower ${index} is too close to the initial spawn location. Skipping collection check.`
-      );
-      return;
-    }
-
-    if (
-      distance < initialFlowerPickupDistance &&
-      !flowersCollected.has(index)
-    ) {
+    if (distance < initialFlowerPickupDistance && !flowersCollected.has(index)) {
       marker.remove();
       flowersCollected.add(index);
-      celebrate(); // Roep de functie aan om te vieren
+
+      const flowerImageUrl = flowerPaths[index];
+      console.log(flowerImageUrl);
+      console.log(flowerPaths);
+      if (flowersCollected.size === amountOfFlowers) {
+        showAllFlowersCollectedMessage();
+      } else {
+        celebrateSingleFlower(flowerImageUrl);
+      }
     }
   });
 }
@@ -155,7 +188,6 @@ function generateFlowerLocations(center, count, radius) {
         let location;
         let isValidLocation = false;
 
-        // Ensure the flower is at least MINIMAL_FLOWER_DISTANCE_IN_METERS from others
         while (!isValidLocation) {
           const randomPoint = getRandomPointInPolygon(isochrone);
           location = { lng: randomPoint[0], lat: randomPoint[1] };
