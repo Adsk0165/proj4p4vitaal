@@ -4,48 +4,40 @@ mapboxgl.accessToken =
 let map;
 let userMarker;
 const flowerMarkers = [];
-const flowerPaths = [];
 const amountOfFlowers = 2;
 const radiusInMeters = 100;
 const MINIMAL_FLOWER_DISTANCE_IN_METERS = 10;
 const initialFlowerPickupDistance = 20;
 const flowersCollected = new Set();
 const flowers = [
-  { name: "flower_1", path: "assets/flower_1.png" },
-  { name: "flower_2", path: "assets/flower_2.png" },
-  { name: "flower_3", path: "assets/flower_3.png" },
-  { name: "flower_4", path: "assets/flower_4.png" },
-  { name: "flower_5", path: "assets/flower_5.png" },
-  { name: "flower_6", path: "assets/flower_6.png" },
-  { name: "flower_7", path: "assets/flower_7.png" },
-  { name: "flower_8", path: "assets/flower_8.png" },
-  { name: "flower_9", path: "assets/flower_9.png" },
-  { name: "flower_10", path: "assets/flower_10.png" },
-  { name: "flower_11", path: "assets/flower_11.png" },
-  { name: "flower_12", path: "assets/flower_12.png" },
-  { name: "flower_13", path: "assets/flower_13.png" },
-  { name: "flower_14", path: "assets/flower_14.png" },
-  { name: "flower_15", path: "assets/flower_15.png" },
-  { name: "flower_16", path: "assets/flower_16.png" },
-  { name: "flower_17", path: "assets/flower_17.png" },
-  { name: "flower_18", path: "assets/flower_18.png" },
-  { name: "flower_19", path: "assets/flower_19.png" },
-  { name: "flower_20", path: "assets/flower_20.png" },
-  { name: "flower_21", path: "assets/flower_21.png" },
-  { name: "flower_22", path: "assets/flower_22.png" },
-  { name: "flower_23", path: "assets/flower_23.png" },
-  { name: "flower_24", path: "assets/flower_24.png" },
-  { name: "flower_25", path: "assets/flower_25.png" },
-  { name: "flower_26", path: "assets/flower_26.png" },
-  { name: "flower_27", path: "assets/flower_27.png" },
+  { name: "flower_1", path: "assets/flowers/flower_1.png" },
+  { name: "flower_2", path: "assets/flowers/flower_2.png" },
+  { name: "flower_3", path: "assets/flowers/flower_3.png" },
+  { name: "flower_4", path: "assets/flowers/flower_4.png" },
+  { name: "flower_5", path: "assets/flowers/flower_5.png" },
+  { name: "flower_6", path: "assets/flowers/flower_6.png" },
+  { name: "flower_7", path: "assets/flowers/flower_7.png" },
+  { name: "flower_8", path: "assets/flowers/flower_8.png" },
+  { name: "flower_9", path: "assets/flowers/flower_9.png" },
+  { name: "flower_10", path: "assets/flowers/flower_10.png" },
+  { name: "flower_11", path: "assets/flowers/flower_11.png" },
+  { name: "flower_12", path: "assets/flowers/flower_12.png" },
+  { name: "flower_13", path: "assets/flowers/flower_13.png" },
+  { name: "flower_14", path: "assets/flowers/flower_14.png" },
+  { name: "flower_15", path: "assets/flowers/flower_15.png" },
+  { name: "flower_16", path: "assets/flowers/flower_16.png" },
+  { name: "flower_17", path: "assets/flowers/flower_17.png" },
+  { name: "flower_18", path: "assets/flowers/flower_18.png" },
+  { name: "flower_19", path: "assets/flowers/flower_19.png" },
+  { name: "flower_20", path: "assets/flowers/flower_20.png" },
+  { name: "flower_21", path: "assets/flowers/flower_21.png" },
+  { name: "flower_22", path: "assets/flowers/flower_22.png" },
+  { name: "flower_23", path: "assets/flowers/flower_23.png" },
+  { name: "flower_24", path: "assets/flowers/flower_24.png" },
+  { name: "flower_25", path: "assets/flowers/flower_25.png" },
+  { name: "flower_26", path: "assets/flowers/flower_26.png" },
+  { name: "flower_27", path: "assets/flowers/flower_27.png" },
 ];
-
-function initializeFlowerPaths(array, count) {
-  for (let i = 1; i <= count; i++) {
-    let flower = `assets/flower_${i}.png`;
-    array.push(flower);
-  }
-}
 
 function pickRandomFlower(array) {
   const randomIndex = Math.floor(Math.random() * array.length);
@@ -54,8 +46,6 @@ function pickRandomFlower(array) {
 }
 
 function initMap(userLocation) {
-  initializeFlowerPaths(flowerPaths, 9);
-
   map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/streets-v11",
