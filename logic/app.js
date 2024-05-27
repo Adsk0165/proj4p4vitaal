@@ -36,7 +36,7 @@ function initMap(userLocation) {
   generateFlowerLocations(userLocation, amountOfFlowers, radiusInMeters);
 
   userMarker = new mapboxgl.Marker({
-    element: createMarkerElement("../assets/current_location_icon.png", 30, 30),
+    element: createMarkerElement("assets/current_location_icon.png", 30, 30),
   })
     .setLngLat([userLocation.lng, userLocation.lat])
     .addTo(map);
