@@ -1,25 +1,46 @@
-mapboxgl.accessToken = 'pk.eyJ1Ijoidml0YWFsb3ZlcmFsMjAyNCIsImEiOiJjbHdseHNoYTEwajVzMmpueG15NjFiNzliIn0.i0vTHFJc8gnPInHozWhDuA';
+mapboxgl.accessToken =
+  "pk.eyJ1Ijoidml0YWFsb3ZlcmFsMjAyNCIsImEiOiJjbHdseHNoYTEwajVzMmpueG15NjFiNzliIn0.i0vTHFJc8gnPInHozWhDuA";
 
 let map;
 let userMarker;
 const flowerMarkers = [];
+const flowerPaths = [];
+const amountOfFlowers = 10;
+const radiusInMeters = 500;
+const MINIMAL_FLOWER_DISTANCE_IN_METERS = 20;
+const initialFlowerPickupDistance = 10;
 const flowersCollected = new Set();
 
+function initializeFlowerPaths(array, count) {
+  for (let i = 1; i <= count; i++) {
+    let flower = `assets/flower_${i}.png`;
+    array.push(flower);
+  }
+}
+
+function pickRandomFlower(array) {
+  const randomIndex = Math.floor(Math.random() * array.length);
+  let randomFlower = array[randomIndex];
+  return randomFlower;
+}
+
 function initMap(userLocation) {
+  initializeFlowerPaths(flowerPaths, 9);
+
   map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v11',
+    container: "map",
+    style: "mapbox://styles/mapbox/streets-v11",
     center: [userLocation.lng, userLocation.lat],
     zoom: 16,
   });
 
-  generateFlowerLocations(userLocation, 10, 1000); // 10 flowers within 1 km radius
+  generateFlowerLocations(userLocation, amountOfFlowers, radiusInMeters); // 10 flowers within 1 km radius
 
   userMarker = new mapboxgl.Marker({
-    element: createMarkerElement('../assets/current_location_icon.png', 30, 30)
+    element: createMarkerElement("../assets/current_location_icon.png", 30, 30),
   })
-  .setLngLat([userLocation.lng, userLocation.lat])
-  .addTo(map);
+    .setLngLat([userLocation.lng, userLocation.lat])
+    .addTo(map);
 
   watchUserLocation();
 }
@@ -27,14 +48,14 @@ function initMap(userLocation) {
 function watchUserLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
-      position => {
+      (position) => {
         const { latitude, longitude } = position.coords;
         const userLocation = { lat: latitude, lng: longitude };
 
         animateMarker(userMarker, userMarker.getLngLat(), userLocation);
         checkProximityToFlowers(userLocation);
       },
-      error => {
+      (error) => {
         console.error("Error getting position: ", error);
       },
       {
@@ -56,8 +77,8 @@ function animateMarker(marker, startPos, endPos) {
 
   function moveMarker() {
     currentFrame++;
-    const lat = startPos.lat + (deltaLat * (currentFrame / frames));
-    const lng = startPos.lng + (deltaLng * (currentFrame / frames));
+    const lat = startPos.lat + deltaLat * (currentFrame / frames);
+    const lng = startPos.lng + deltaLng * (currentFrame / frames);
     marker.setLngLat([lng, lat]);
 
     if (currentFrame < frames) {
@@ -77,32 +98,47 @@ function celebrate() {
   });
 
   // Laat de pop-up zien
-  const popup = document.getElementById('popup');
-  popup.style.display = 'flex';
+  const popup = document.getElementById("popup");
+  popup.style.display = "flex";
 
   // Verberg de pop-up na enkele seconden
   setTimeout(() => {
-      popup.style.display = 'none';
+    popup.style.display = "none";
   }, 5000); // Stel hier de gewenste tijd in voor het tonen van de pop-up
 }
 
 function checkProximityToFlowers(userLocation) {
   flowerMarkers.forEach((marker, index) => {
-      const flowerLocation = marker.getLngLat();
-      const distance = turf.distance([userLocation.lng, userLocation.lat], [flowerLocation.lng, flowerLocation.lat], { units: 'meters' });
-      console.log(`Distance to flower ${index}: ${distance} meters`); // Debugging output
-      if (distance < 50 && !flowersCollected.has(index)) {
-          marker.remove();
-          flowersCollected.add(index);
-          celebrate(); // Roep de functie aan om te vieren
-      }
+    const flowerLocation = marker.getLngLat();
+    const distance = turf.distance(
+      [userLocation.lng, userLocation.lat],
+      [flowerLocation.lng, flowerLocation.lat],
+      { units: "meters" }
+    );
+
+    // Skip proximity check if user is within initialFlowerPickupDistance
+    if (distance < initialFlowerPickupDistance) {
+      console.log(
+        `Flower ${index} is too close to the initial spawn location. Skipping collection check.`
+      );
+      return;
+    }
+
+    if (
+      distance < initialFlowerPickupDistance &&
+      !flowersCollected.has(index)
+    ) {
+      marker.remove();
+      flowersCollected.add(index);
+      celebrate(); // Roep de functie aan om te vieren
+    }
   });
 }
 
 function createMarkerElement(url, width, height) {
-  const element = document.createElement('div');
+  const element = document.createElement("div");
   element.style.backgroundImage = `url(${url})`;
-  element.style.backgroundSize = 'cover';
+  element.style.backgroundSize = "cover";
   element.style.width = `${width}px`;
   element.style.height = `${height}px`;
   return element;
@@ -112,23 +148,38 @@ function generateFlowerLocations(center, count, radius) {
   const isochroneServiceUrl = `https://api.mapbox.com/isochrone/v1/mapbox/walking/${center.lng},${center.lat}?contours_meters=${radius}&polygons=true&access_token=${mapboxgl.accessToken}`;
 
   fetch(isochroneServiceUrl)
-    .then(response => response.json())
-    .then(data => {
+    .then((response) => response.json())
+    .then((data) => {
       const isochrone = data.features[0].geometry.coordinates[0];
       for (let i = 0; i < count; i++) {
-        const randomPoint = getRandomPointInPolygon(isochrone);
-        const location = { lng: randomPoint[0], lat: randomPoint[1] };
+        let location;
+        let isValidLocation = false;
+
+        // Ensure the flower is at least MINIMAL_FLOWER_DISTANCE_IN_METERS from others
+        while (!isValidLocation) {
+          const randomPoint = getRandomPointInPolygon(isochrone);
+          location = { lng: randomPoint[0], lat: randomPoint[1] };
+          isValidLocation = flowerMarkers.every((marker) => {
+            const flowerLocation = marker.getLngLat();
+            const distance = turf.distance(
+              [location.lng, location.lat],
+              [flowerLocation.lng, flowerLocation.lat],
+              { units: "meters" }
+            );
+            return distance >= MINIMAL_FLOWER_DISTANCE_IN_METERS;
+          });
+        }
 
         const marker = new mapboxgl.Marker({
-          element: createMarkerElement('../assets/flower_1.png', 30, 30)
+          element: createMarkerElement(pickRandomFlower(flowerPaths), 30, 30),
         })
-        .setLngLat([location.lng, location.lat])
-        .addTo(map);
+          .setLngLat([location.lng, location.lat])
+          .addTo(map);
 
         flowerMarkers.push(marker);
       }
     })
-    .catch(error => console.error('Error fetching isochrone:', error));
+    .catch((error) => console.error("Error fetching isochrone:", error));
 }
 
 function getRandomPointInPolygon(polygon) {
@@ -142,15 +193,15 @@ function getRandomPointInPolygon(polygon) {
   }
 }
 
-window.onload = function() {
+window.onload = function () {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      position => {
+      (position) => {
         const { latitude, longitude } = position.coords;
         const userLocation = { lat: latitude, lng: longitude };
         initMap(userLocation);
       },
-      error => {
+      (error) => {
         console.error("Error getting position: ", error);
         alert("Geolocation is not supported by this browser.");
       },
@@ -167,18 +218,18 @@ window.onload = function() {
 
 function updatePosition() {
   $.ajax({
-    url: '../logic/get_position.php',
-    dataType: 'json',
-    success: function(data) {
+    url: "../logic/get_position.php",
+    dataType: "json",
+    success: function (data) {
       const newPosition = { lat: data.lat, lng: data.lng };
       animateMarker(userMarker, userMarker.getLngLat(), newPosition);
     },
-    complete: function() {
+    complete: function () {
       setTimeout(updatePosition, 10000);
-    }
+    },
   });
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
   updatePosition();
 });
