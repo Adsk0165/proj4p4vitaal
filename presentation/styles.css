@@ -13,6 +13,7 @@
 body {
     font-family: Arial, sans-serif;
     background-color: var(--body-bg-color);
+    height: 100%;
   }
   
   h1 {
@@ -70,4 +71,24 @@ body {
   border-radius: 10px;
   text-align: center;
 }
+.container-center {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.text-center{
+  border: 5px solid #000000;
+}
+.items{
+  margin: 20px;
+}
+.btn-secondary:active,
+        .btn-secondary.active,
+        .btn-secondary:focus,
+        .btn-secondary:active:focus {
+            background-color: var(--primary-color-oranje);
+            border-color: var(--primary-color-oranje);
+            color: var(--primary-text-color);
+        }
   
