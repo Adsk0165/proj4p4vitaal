@@ -4,9 +4,9 @@ mapboxgl.accessToken =
 let map;
 let userMarker;
 const flowerMarkers = [];
-const amountOfFlowers = 2;
-const radiusInMeters = 100;
-const MINIMAL_FLOWER_DISTANCE_IN_METERS = 10;
+const amountOfFlowers = 100;
+const radiusInMeters = 1000;
+const MINIMAL_FLOWER_DISTANCE_IN_METERS = 5;
 const initialFlowerPickupDistance = 20;
 const flowersCollected = new Set();
 const flowers = [
