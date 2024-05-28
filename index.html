@@ -1,32 +1,48 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Vitaal Overal</title>
-  <link rel="stylesheet" type="text/css" href="/presentation/styles.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet" />
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@3.0.3/tsparticles.confetti.bundle.min.js"></script>
-</head>
-<body>
-  <h1>Vitaal Overal</h1>
-  <div id="map"></div>
+  <head>
+    <title>Vitaal Overal</title>
+    <link rel="stylesheet" type="text/css" href="presentation/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@3.0.3/tsparticles.confetti.bundle.min.js"></script>
+  </head>
+  <body>
+    <h1>Vitaal Overal</h1>
+    <div id="map"></div>
 
-  <!-- HTML voor de pop-up met confetti -->
-  <div id="popup" class="popup">
-    <div class="popup-content">
+    <!-- HTML voor de pop-up met confetti -->
+    <div id="popup-flower" class="popup">
+      <div class="popup-content">
         <h2>Bloem verzameld!</h2>
-        <!-- Voeg hier eventueel andere inhoud toe aan je pop-up -->
+        <div>
+          <img
+            id="collected-flower-img"
+            src=""
+            alt="Collected Flower"
+            style="width: 100px"
+          />
+          <p id="collected-flower-name"></p>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <script src="/logic/app.js"></script> <!-- JavaScript-inclusie binnen de body -->
-  <script>
+    <div id="popup-bouquet" class="popup" style="display: none">
+      <div class="popup-content">
+        <h1>Gefeliciteerd!</h1>
+        <img src="assets/bouquet.png" alt="Bouquet" style="width: 200px" />
+        <p>Je hebt alle bloemen verzameld!</p>
+      </div>
+    </div>
 
-
-  </script>
-</body>
+    <script src="logic/app.js"></script>
+    <!-- JavaScript-inclusie binnen de body -->
+    <script></script>
+  </body>
 </html>
-
